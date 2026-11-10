@@ -1,0 +1,47 @@
+{
+  "name": "agentic-joplin",
+  "version": "0.1.0",
+  "description": "Keep the Joplin CLI in sync on macOS: a launchd agent with overlap protection, log rotation and failure notifications",
+  "keywords": [
+    "joplin",
+    "sync",
+    "launchd",
+    "macos",
+    "e2ee"
+  ],
+  "license": "MIT",
+  "author": "Rafael Lima",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafaelp/agentic-joplin.git"
+  },
+  "homepage": "https://github.com/rafaelp/agentic-joplin#readme",
+  "bugs": "https://github.com/rafaelp/agentic-joplin/issues",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "os": [
+    "darwin"
+  ],
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "sync": "node src/sync.ts",
+    "typecheck": "tsc",
+    "agent:install": "node src/agent.ts install",
+    "agent:uninstall": "node src/agent.ts uninstall",
+    "agent:print": "node src/agent.ts print",
+    "agent:run": "node src/agent.ts run",
+    "status": "node src/agent.ts status",
+    "logs": "node src/agent.ts logs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^7.0.2"
+  }
+}
