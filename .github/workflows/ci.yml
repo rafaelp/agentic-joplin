@@ -23,7 +23,7 @@ jobs:
       - name: Install the packed npm package globally
         run: |
           npm pack
-          npm install -g ./rafaelp-agentic-joplin-*.tgz
+          npm install -g ./rafaelp-aios-agentic-joplin-*.tgz
           agentic-joplin --version
       - name: Generated plist is valid
         run: JOPLIN_BIN=/usr/bin/true agentic-joplin print | plutil -lint -

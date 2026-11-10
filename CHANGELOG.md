@@ -10,10 +10,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- npm package `@rafaelp/agentic-joplin` with an `agentic-joplin` command: `sync`, `install`,
+- npm package `@rafaelp-aios/agentic-joplin` with an `agentic-joplin` command: `sync`, `install`,
   `uninstall`, `status`, `run`, `logs`, `print`, `help` and `version`. The package ships compiled
   JavaScript, because Node does not strip types inside `node_modules`.
-
 - Claude Code plugin marketplace with the `agentic-joplin` plugin:
   - `joplin-cli` skill, which teaches the Joplin terminal app: reading, read-only SQLite search,
     writing with `set`, trash, sync and E2EE, import and export.

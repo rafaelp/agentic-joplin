@@ -25,7 +25,7 @@ compiles `src/` to `dist/` (and rewrites the `.ts` imports), and `npm pack`/`npm
 automatically. To try the package exactly as users get it:
 
 ```bash
-npm pack && npm install -g ./rafaelp-agentic-joplin-*.tgz && agentic-joplin --version
+npm pack && npm install -g ./rafaelp-aios-agentic-joplin-*.tgz && agentic-joplin --version
 ```
 
 ## Guidelines

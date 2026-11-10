@@ -1,5 +1,5 @@
 {
-  "name": "@rafaelp/agentic-joplin",
+  "name": "@rafaelp-aios/agentic-joplin",
   "version": "0.2.0",
   "description": "Keep the Joplin CLI in sync on macOS: a launchd agent with overlap protection, log rotation and failure notifications",
   "keywords": [

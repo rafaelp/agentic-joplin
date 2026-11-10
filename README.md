@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://github.com/rafaelp/agentic-joplin/actions/workflows/ci.yml"><img src="https://github.com/rafaelp/agentic-joplin/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://www.npmjs.com/package/@rafaelp/agentic-joplin"><img src="https://img.shields.io/npm/v/@rafaelp/agentic-joplin?color=cb3837" alt="npm"></a>
+  <a href="https://www.npmjs.com/package/@rafaelp-aios/agentic-joplin"><img src="https://img.shields.io/npm/v/@rafaelp-aios/agentic-joplin?color=cb3837" alt="npm"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f80ed" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/macOS-launchd-5b3fd9" alt="macOS launchd">
   <img src="https://img.shields.io/badge/node-%E2%89%A524-417e38" alt="Node 24 or later">
@@ -44,7 +44,7 @@ that drives it can easily get stuck in its interactive UI. agentic-joplin fixes 
   command that takes the same commands as the CLI.
 
 ```text
-$ npm install -g @rafaelp/agentic-joplin
+$ npm install -g @rafaelp-aios/agentic-joplin
 $ agentic-joplin install
 installed ~/Library/LaunchAgents/agentic-joplin.plist
 runs every 15 min, log: ~/Library/Logs/agentic-joplin/sync.log
@@ -90,7 +90,7 @@ already configured (`joplin sync` works when you run it by hand).
 
 ```bash
 npm install -g joplin                    # if you don't have it yet; then set up sync and run `joplin sync` once
-npm install -g @rafaelp/agentic-joplin   # the npm name is scoped; the command is `agentic-joplin`
+npm install -g @rafaelp-aios/agentic-joplin   # the npm name is scoped; the command is `agentic-joplin`
 agentic-joplin sync                      # one run in the foreground, to check that everything works
 agentic-joplin install                   # install and start the launchd agent
 ```
@@ -176,7 +176,7 @@ AJ_LABEL=agentic-joplin-work JOPLIN_PROFILE=~/.config/joplin-work agentic-joplin
 ```
 
 The agent runs the Node binary that ran `agentic-joplin install`, and looks for `joplin` next to it.
-If you remove that Node version, install `joplin` and `@rafaelp/agentic-joplin` on the new one and
+If you remove that Node version, install `joplin` and `@rafaelp-aios/agentic-joplin` on the new one and
 run `agentic-joplin install` again.
 
 ## How a run works
