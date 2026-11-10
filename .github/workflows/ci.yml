@@ -20,8 +20,13 @@ jobs:
         run: |
           node -e 'for (const f of process.argv.slice(1)) JSON.parse(require("fs").readFileSync(f, "utf8"))' \
             .claude-plugin/marketplace.json plugins/agentic-joplin/.claude-plugin/plugin.json
+      - name: Install the packed npm package globally
+        run: |
+          npm pack
+          npm install -g ./rafaelp-agentic-joplin-*.tgz
+          agentic-joplin --version
       - name: Generated plist is valid
-        run: JOPLIN_BIN=/usr/bin/true node src/agent.ts print | plutil -lint -
+        run: JOPLIN_BIN=/usr/bin/true agentic-joplin print | plutil -lint -
       - name: Smoke test with a fake joplin
         env:
           AJ_LABEL: agentic-joplin-ci
@@ -29,8 +34,8 @@ jobs:
         run: |
           state="$HOME/Library/Application Support/$AJ_LABEL/state.json"
           printf '#!/bin/sh\necho "Fetched items: 1/1"\n' > "$RUNNER_TEMP/joplin" && chmod +x "$RUNNER_TEMP/joplin"
-          JOPLIN_BIN="$RUNNER_TEMP/joplin" node src/sync.ts
+          JOPLIN_BIN="$RUNNER_TEMP/joplin" agentic-joplin sync
           grep -q '"consecutiveFailures": 0' "$state"
-          JOPLIN_BIN=/usr/bin/false node src/sync.ts
+          JOPLIN_BIN=/usr/bin/false agentic-joplin sync
           grep -q '"consecutiveFailures": 1' "$state"
           cat "$HOME/Library/Logs/$AJ_LABEL/sync.log"

@@ -25,12 +25,12 @@ body:
     id: logs
     attributes:
       label: Relevant log lines
-      description: From `npm run logs` or `~/Library/Logs/agentic-joplin/`. Remove note titles or anything private.
+      description: From `agentic-joplin logs` or `~/Library/Logs/agentic-joplin/`. Remove note titles or anything private.
       render: text
   - type: input
     id: versions
     attributes:
       label: Versions
-      placeholder: macOS 26.1, Node 24.21.0, Joplin CLI 3.7.1, agentic-joplin 0.1.0
+      placeholder: macOS 26.1, Node 24.21.0, Joplin CLI 3.7.1, agentic-joplin 0.2.0
     validations:
       required: true

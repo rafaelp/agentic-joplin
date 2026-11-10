@@ -1,7 +1,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { homedir, userInfo } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, extname, join } from 'node:path';
 import { config, ENV_KEYS } from './config.ts';
 import { loadState } from './state.ts';
 
@@ -13,15 +13,16 @@ const xml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 // The agent runs the node binary that ran this command, by absolute path, so switching the
 // global node version of a version manager (mise, nvm, asdf…) does not break it. After moving to
-// another node version, install joplin there and run `npm run agent:install` again.
-function buildPlist(): string {
+// another node version, install joplin and agentic-joplin there and run `agentic-joplin install` again.
+export function buildPlist(): string {
   const nodeBin = process.execPath;
   const binDir = dirname(nodeBin);
   const joplinBin = process.env.JOPLIN_BIN ?? join(binDir, 'joplin');
   if (!existsSync(joplinBin)) {
     throw new Error(`joplin not found at ${joplinBin}. Install it for node ${process.version} or set JOPLIN_BIN.`);
   }
-  const script = resolve(import.meta.dirname, 'sync.ts');
+  // cli.ts when run from a checkout, dist/cli.js when installed from npm.
+  const cli = join(import.meta.dirname, `cli${extname(import.meta.filename)}`);
 
   const env: Record<string, string> = { PATH: `${binDir}:/usr/bin:/bin`, JOPLIN_BIN: joplinBin };
   for (const key of ENV_KEYS) {
@@ -41,7 +42,8 @@ function buildPlist(): string {
   <key>ProgramArguments</key>
   <array>
     <string>${xml(nodeBin)}</string>
-    <string>${xml(script)}</string>
+    <string>${xml(cli)}</string>
+    <string>sync</string>
   </array>
   <key>EnvironmentVariables</key>
   <dict>
@@ -68,7 +70,7 @@ function bootout() {
   spawnSync('launchctl', ['bootout', service], { stdio: 'ignore' });
 }
 
-function install() {
+export function install() {
   const plist = buildPlist();
   mkdirSync(dirname(plistPath), { recursive: true });
   mkdirSync(config.logDir, { recursive: true });
@@ -79,13 +81,13 @@ function install() {
   console.log(`installed ${plistPath}\nruns every ${config.intervalSeconds / 60} min, log: ${config.syncLog}`);
 }
 
-function uninstall() {
+export function uninstall() {
   bootout();
   if (existsSync(plistPath)) unlinkSync(plistPath);
   console.log(`removed ${plistPath}`);
 }
 
-function status() {
+export function status() {
   const loaded = spawnSync('launchctl', ['print', service], { encoding: 'utf8' });
   if (loaded.status !== 0) {
     console.log('agent: not loaded');
@@ -96,18 +98,10 @@ function status() {
   console.log(JSON.stringify(loadState(), null, 2));
 }
 
-const commands: Record<string, () => void> = {
-  install,
-  uninstall,
-  status,
-  print: () => process.stdout.write(buildPlist()),
-  run: () => execFileSync('launchctl', ['kickstart', service], { stdio: 'inherit' }),
-  logs: () => spawnSync('tail', ['-n', '50', '-f', config.syncLog], { stdio: 'inherit' }),
-};
-
-const command = commands[process.argv[2] ?? ''];
-if (!command) {
-  console.error(`usage: node src/agent.ts <${Object.keys(commands).join('|')}>`);
-  process.exit(1);
+export function kickstart() {
+  execFileSync('launchctl', ['kickstart', service], { stdio: 'inherit' });
 }
-command();
+
+export function followLogs() {
+  spawnSync('tail', ['-n', '50', '-f', config.syncLog], { stdio: 'inherit' });
+}

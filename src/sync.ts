@@ -51,7 +51,7 @@ function recordSuccess(state: State, startedAt: number) {
   log(`ok in ${duration(Date.now() - startedAt)}`);
 }
 
-async function main() {
+export async function runSync() {
   const lock = acquireLock();
   if (!('release' in lock)) {
     // No state update: the run holding the lock owns the state file right now.
@@ -87,5 +87,3 @@ async function main() {
     lock.release();
   }
 }
-
-await main();

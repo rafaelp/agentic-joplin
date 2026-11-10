@@ -13,11 +13,20 @@ Thanks for helping. Bug reports, fixes and small features are welcome.
 ```bash
 npm install
 npm run typecheck
+node src/cli.ts help        # run the CLI straight from the sources
 ```
 
-There is no build step: Node 24+ runs the `.ts` files directly through type stripping. Keep the
-code to erasable syntax (`erasableSyntaxOnly` in `tsconfig.json` enforces it) and import local
+Node 24+ runs the `.ts` files directly through type stripping, so development needs no build. Keep
+the code to erasable syntax (`erasableSyntaxOnly` in `tsconfig.json` enforces it) and import local
 files with their `.ts` extension.
+
+Node does not strip types inside `node_modules`, so the npm package ships JavaScript. `npm run build`
+compiles `src/` to `dist/` (and rewrites the `.ts` imports), and `npm pack`/`npm publish` run it
+automatically. To try the package exactly as users get it:
+
+```bash
+npm pack && npm install -g ./rafaelp-agentic-joplin-*.tgz && agentic-joplin --version
+```
 
 ## Guidelines
 
@@ -25,7 +34,7 @@ files with their `.ts` extension.
   standard library means nothing to install or audit, and nothing to break on upgrade.
 - **Never run commands through a shell.** Use `spawn`/`execFile` with an argument array.
 - **New settings are environment variables.** Add them to `ENV_KEYS` and `config` in
-  `src/config.ts` so `agent:install` copies them into the plist, and document them in the README.
+  `src/config.ts` so `agentic-joplin install` copies them into the plist, and document them in the README.
 - **Joplin output is translated.** Do not detect states by matching English CLI messages alone.
   Prefer exit codes, file names or the untranslated `log.txt` entries, as `src/joplin.ts` does.
 

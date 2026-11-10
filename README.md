@@ -13,17 +13,29 @@
 
 <p align="center">
   <a href="https://github.com/rafaelp/agentic-joplin/actions/workflows/ci.yml"><img src="https://github.com/rafaelp/agentic-joplin/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/@rafaelp/agentic-joplin"><img src="https://img.shields.io/npm/v/@rafaelp/agentic-joplin?color=cb3837" alt="npm"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f80ed" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/macOS-launchd-5b3fd9" alt="macOS launchd">
   <img src="https://img.shields.io/badge/node-%E2%89%A524-417e38" alt="Node 24 or later">
   <img src="https://img.shields.io/badge/runtime%20deps-0-59636e" alt="Zero runtime dependencies">
 </p>
 
+## What is Joplin?
+
+[Joplin](https://joplinapp.org) is a free, open-source app for notes and to-dos. Notes are written in
+Markdown and organized in notebooks and tags, with attachments, note history and a web clipper.
+Joplin runs on Windows, macOS, Linux, Android and iOS, and in the terminal.
+
+Your notes are not locked into Joplin's servers. Joplin syncs through Joplin Cloud, a self-hosted
+Joplin Server, Dropbox, OneDrive, Nextcloud, WebDAV, S3 or a plain folder, and can encrypt
+everything end to end before it leaves your device. Its
+[terminal app](https://joplinapp.org/help/apps/terminal/), the `joplin` command, works on the same
+notes as the other apps.
+
 ## What is agentic-joplin?
 
-[Joplin](https://joplinapp.org) has an excellent terminal app, but it only syncs when you run
-`joplin sync`, and an AI agent that drives it can easily get stuck in its interactive UI.
-agentic-joplin fixes both:
+Joplin's terminal app is excellent, but it only syncs when you run `joplin sync`, and an AI agent
+that drives it can easily get stuck in its interactive UI. agentic-joplin fixes both:
 
 - **A sync agent for macOS.** A launchd job runs `joplin sync` and `joplin e2ee decrypt` every 15
   minutes. It never lets two runs overlap, kills a sync that hangs, keeps the logs small and shows
@@ -32,11 +44,12 @@ agentic-joplin fixes both:
   command that takes the same commands as the CLI.
 
 ```text
-$ npm run agent:install
+$ npm install -g @rafaelp/agentic-joplin
+$ agentic-joplin install
 installed ~/Library/LaunchAgents/agentic-joplin.plist
 runs every 15 min, log: ~/Library/Logs/agentic-joplin/sync.log
 
-$ npm run logs
+$ agentic-joplin logs
 2026-11-10T03:37:02Z [73871] sync started
 2026-11-10T03:37:10Z [73871] sync: Fetched items: 1/1. Completed: 10/11/2026 00:37 (4s)
 2026-11-10T03:37:12Z [73871] decrypt: Decrypted items: 0 | Completed decryption.
@@ -67,8 +80,8 @@ $ npm run logs
 - **Agent-safe Joplin.** The plugin keeps Claude out of the TUI and the external editor, uses IDs
   instead of ambiguous titles, searches through a read-only SQLite query, and asks before deleting
   anything or making changes that affect every device.
-- **Nothing to install at runtime.** TypeScript runs on Node's built-in type stripping, with only
-  the standard library.
+- **Zero runtime dependencies.** One `npm install -g`, and the agent uses only Node's standard
+  library.
 
 ## Quick start
 
@@ -76,13 +89,10 @@ Requirements: macOS, Node.js 24+, and the Joplin terminal app installed for that
 already configured (`joplin sync` works when you run it by hand).
 
 ```bash
-npm install -g joplin   # if you don't have it yet; then configure sync and run `joplin sync` once
-
-git clone https://github.com/rafaelp/agentic-joplin.git
-cd agentic-joplin
-npm install             # dev dependencies only (TypeScript, @types/node)
-npm run sync            # one run in the foreground, to check that everything works
-npm run agent:install   # install and start the launchd agent
+npm install -g joplin                    # if you don't have it yet; then set up sync and run `joplin sync` once
+npm install -g @rafaelp/agentic-joplin   # the npm name is scoped; the command is `agentic-joplin`
+agentic-joplin sync                      # one run in the foreground, to check that everything works
+agentic-joplin install                   # install and start the launchd agent
 ```
 
 <details>
@@ -118,12 +128,13 @@ The plugin works without the sync agent, and on any OS where the Joplin CLI runs
 
 | Command | What it does |
 | --- | --- |
-| `npm run sync` | Run one sync now, in the foreground |
-| `npm run agent:run` | Ask launchd to start a run now |
-| `npm run status` | Show whether the agent is loaded, plus the last run, success and error |
-| `npm run logs` | Follow the sync log |
-| `npm run agent:print` | Print the plist that `agent:install` would write |
-| `npm run agent:uninstall` | Unload the agent and delete its plist |
+| `agentic-joplin sync` | Run one sync now, in the foreground |
+| `agentic-joplin install` | Install and start the launchd agent |
+| `agentic-joplin run` | Ask launchd to start a run now |
+| `agentic-joplin status` | Show whether the agent is loaded, plus the last run, success and error |
+| `agentic-joplin logs` | Follow the sync log |
+| `agentic-joplin print` | Print the plist that `install` would write |
+| `agentic-joplin uninstall` | Unload the agent and delete its plist |
 
 | Path | Content |
 | --- | --- |
@@ -135,11 +146,11 @@ The plugin works without the sync agent, and on any OS where the Joplin CLI runs
 
 ## Configuration
 
-Settings are environment variables. Set them when you run `npm run agent:install` and they are
+Settings are environment variables. Set them when you run `agentic-joplin install` and they are
 written into the plist, so they also apply to scheduled runs:
 
 ```bash
-AJ_INTERVAL_MIN=30 AJ_SYNC_TIMEOUT_MIN=120 npm run agent:install
+AJ_INTERVAL_MIN=30 AJ_SYNC_TIMEOUT_MIN=120 agentic-joplin install
 ```
 
 | Variable | Default | Meaning |
@@ -161,11 +172,12 @@ AJ_INTERVAL_MIN=30 AJ_SYNC_TIMEOUT_MIN=120 npm run agent:install
 To run a second agent for another Joplin profile, give it its own label:
 
 ```bash
-AJ_LABEL=agentic-joplin-work JOPLIN_PROFILE=~/.config/joplin-work npm run agent:install
+AJ_LABEL=agentic-joplin-work JOPLIN_PROFILE=~/.config/joplin-work agentic-joplin install
 ```
 
-The agent runs the Node binary that ran `agent:install`, and looks for `joplin` next to it. If you
-remove that Node version, install Joplin on the new one and run `npm run agent:install` again.
+The agent runs the Node binary that ran `agentic-joplin install`, and looks for `joplin` next to it.
+If you remove that Node version, install `joplin` and `@rafaelp/agentic-joplin` on the new one and
+run `agentic-joplin install` again.
 
 ## How a run works
 
@@ -194,7 +206,8 @@ agentic-joplin/
 │       └── skills/
 │           ├── joplin/        # /joplin [command]
 │           └── joplin-cli/    # How to use the Joplin CLI
-└── src/                   # The sync agent (TypeScript, no build step)
+└── src/                   # The sync agent (TypeScript, built to dist/ for npm)
+    ├── cli.ts             # The agentic-joplin command
     ├── agent.ts           # install, uninstall, status, print, run, logs
     ├── sync.ts            # One sync run
     ├── config.ts          # Settings and environment variables

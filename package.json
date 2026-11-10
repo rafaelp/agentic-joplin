@@ -1,6 +1,6 @@
 {
-  "name": "agentic-joplin",
-  "version": "0.1.0",
+  "name": "@rafaelp/agentic-joplin",
+  "version": "0.2.0",
   "description": "Keep the Joplin CLI in sync on macOS: a launchd agent with overlap protection, log rotation and failure notifications",
   "keywords": [
     "joplin",
@@ -18,6 +18,9 @@
   "homepage": "https://github.com/rafaelp/agentic-joplin#readme",
   "bugs": "https://github.com/rafaelp/agentic-joplin/issues",
   "type": "module",
+  "bin": {
+    "agentic-joplin": "dist/cli.js"
+  },
   "engines": {
     "node": ">=24"
   },
@@ -25,20 +28,26 @@
     "darwin"
   ],
   "files": [
-    "src",
+    "dist",
     "README.md",
     "LICENSE",
-    "SECURITY.md"
+    "SECURITY.md",
+    "CHANGELOG.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "sync": "node src/sync.ts",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepack": "npm run build",
     "typecheck": "tsc",
-    "agent:install": "node src/agent.ts install",
-    "agent:uninstall": "node src/agent.ts uninstall",
-    "agent:print": "node src/agent.ts print",
-    "agent:run": "node src/agent.ts run",
-    "status": "node src/agent.ts status",
-    "logs": "node src/agent.ts logs"
+    "sync": "node src/cli.ts sync",
+    "agent:install": "node src/cli.ts install",
+    "agent:uninstall": "node src/cli.ts uninstall",
+    "agent:print": "node src/cli.ts print",
+    "agent:run": "node src/cli.ts run",
+    "status": "node src/cli.ts status",
+    "logs": "node src/cli.ts logs"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

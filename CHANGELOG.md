@@ -6,14 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-10
+
 ### Added
+
+- npm package `@rafaelp/agentic-joplin` with an `agentic-joplin` command: `sync`, `install`,
+  `uninstall`, `status`, `run`, `logs`, `print`, `help` and `version`. The package ships compiled
+  JavaScript, because Node does not strip types inside `node_modules`.
 
 - Claude Code plugin marketplace with the `agentic-joplin` plugin:
   - `joplin-cli` skill, which teaches the Joplin terminal app: reading, read-only SQLite search,
     writing with `set`, trash, sync and E2EE, import and export.
   - `/joplin [command]` skill, which runs Joplin CLI commands and confirms destructive ones.
-- Logo, Code of Conduct, CI (typecheck, manifests, plist and a smoke test), issue and pull request
-  templates, and Dependabot.
+- Logo, Code of Conduct, CI (typecheck, manifests, packed package, plist and a smoke test), issue
+  and pull request templates, and Dependabot.
+
+### Changed
+
+- The launchd agent now runs `agentic-joplin sync`. Agents installed with 0.1.0 point to
+  `src/sync.ts`, which no longer runs a sync on its own: run `agentic-joplin install` again.
 
 ## [0.1.0] - 2026-11-10
 
