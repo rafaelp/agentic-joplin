@@ -1,0 +1,12 @@
+{
+  "name": "agentic-joplin",
+  "version": "0.1.0",
+  "description": "Teaches Claude the Joplin terminal app and adds a /joplin command that runs Joplin CLI commands",
+  "author": {
+    "name": "Rafael Lima"
+  },
+  "homepage": "https://github.com/rafaelp/agentic-joplin",
+  "repository": "https://github.com/rafaelp/agentic-joplin",
+  "license": "MIT",
+  "keywords": ["joplin", "notes", "cli", "e2ee"]
+}

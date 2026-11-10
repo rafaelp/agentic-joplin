@@ -1,0 +1,36 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - name: Manifests are valid JSON
+        run: |
+          node -e 'for (const f of process.argv.slice(1)) JSON.parse(require("fs").readFileSync(f, "utf8"))' \
+            .claude-plugin/marketplace.json plugins/agentic-joplin/.claude-plugin/plugin.json
+      - name: Generated plist is valid
+        run: JOPLIN_BIN=/usr/bin/true node src/agent.ts print | plutil -lint -
+      - name: Smoke test with a fake joplin
+        env:
+          AJ_LABEL: agentic-joplin-ci
+          AJ_NOTIFY: '0'
+        run: |
+          state="$HOME/Library/Application Support/$AJ_LABEL/state.json"
+          printf '#!/bin/sh\necho "Fetched items: 1/1"\n' > "$RUNNER_TEMP/joplin" && chmod +x "$RUNNER_TEMP/joplin"
+          JOPLIN_BIN="$RUNNER_TEMP/joplin" node src/sync.ts
+          grep -q '"consecutiveFailures": 0' "$state"
+          JOPLIN_BIN=/usr/bin/false node src/sync.ts
+          grep -q '"consecutiveFailures": 1' "$state"
+          cat "$HOME/Library/Logs/$AJ_LABEL/sync.log"

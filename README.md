@@ -1,53 +1,118 @@
-# agentic-joplin
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.png">
+    <img src=".github/assets/logo.png" alt="agentic-joplin" height="80">
+  </picture>
+</p>
 
-Keep the [Joplin](https://joplinapp.org) terminal client in sync on macOS, unattended.
+<p align="center">
+  <strong>Your Joplin notes, always in sync and within reach of your AI agent.</strong><br>
+  Sync · Watch · Ask<br>
+  <sub>A launchd agent for the Joplin terminal app, plus a Claude Code plugin</sub>
+</p>
 
-The Joplin CLI only syncs when you run `joplin sync`. `agentic-joplin` installs a small launchd
-agent that does it for you every 15 minutes and handles the parts a cron one-liner gets wrong:
+<p align="center">
+  <a href="https://github.com/rafaelp/agentic-joplin/actions/workflows/ci.yml"><img src="https://github.com/rafaelp/agentic-joplin/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f80ed" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/macOS-launchd-5b3fd9" alt="macOS launchd">
+  <img src="https://img.shields.io/badge/node-%E2%89%A524-417e38" alt="Node 24 or later">
+  <img src="https://img.shields.io/badge/runtime%20deps-0-59636e" alt="Zero runtime dependencies">
+</p>
 
-- **No overlapping runs.** A run that starts while the previous one is still going is skipped. A run
-  that exceeds the timeout (90 min by default) is killed, so a hung sync cannot block the next ones
-  forever. Locks left behind by a killed or crashed run are detected and taken over.
-- **Failure notifications.** A macOS notification is shown when a sync fails (non-zero exit,
-  timeout, or item errors reported by Joplin), again every hour while it keeps failing, and once
-  more when it recovers. If syncing is blocked for 2 hours because another `joplin` process holds
-  Joplin's own sync lock, you get a "stalled" notification.
-- **Bounded logs.** Its own logs are rotated by size, and so is Joplin's `log.txt`, which the CLI
-  only rotates in interactive mode and otherwise grows forever.
-- **E2EE aware.** Each run follows `joplin sync` with `joplin e2ee decrypt`, because the CLI exits
-  before its background decryption worker finishes.
+## What is agentic-joplin?
 
-It has no runtime dependencies: TypeScript runs directly on Node's built-in type stripping.
+[Joplin](https://joplinapp.org) has an excellent terminal app, but it only syncs when you run
+`joplin sync`, and an AI agent that drives it can easily get stuck in its interactive UI.
+agentic-joplin fixes both:
 
-## Requirements
+- **A sync agent for macOS.** A launchd job runs `joplin sync` and `joplin e2ee decrypt` every 15
+  minutes. It never lets two runs overlap, kills a sync that hangs, keeps the logs small and shows
+  a notification when something breaks.
+- **A Claude Code plugin.** It teaches Claude how to use the Joplin CLI safely and adds a `/joplin`
+  command that takes the same commands as the CLI.
 
-- macOS (uses launchd and `osascript`)
-- Node.js 24 or later
-- The Joplin CLI installed for that same Node version and already configured: sync target set up,
-  authenticated, and the E2EE master password entered if you use encryption. Check that
-  `joplin sync` works when you run it by hand first.
+```text
+$ npm run agent:install
+installed ~/Library/LaunchAgents/agentic-joplin.plist
+runs every 15 min, log: ~/Library/Logs/agentic-joplin/sync.log
 
-```bash
-npm install -g joplin
+$ npm run logs
+2026-11-10T03:37:02Z [73871] sync started
+2026-11-10T03:37:10Z [73871] sync: Fetched items: 1/1. Completed: 10/11/2026 00:37 (4s)
+2026-11-10T03:37:12Z [73871] decrypt: Decrypted items: 0 | Completed decryption.
+2026-11-10T03:37:12Z [73871] ok in 11s
 ```
 
-If the install fails while building `sharp` against a Homebrew `libvips`, retry with
-`SHARP_IGNORE_GLOBAL_LIBVIPS=1`. If npm skips install scripts, allow the native modules with
-`--allow-scripts=keytar,sharp,sqlite3`.
+```text
+> /joplin ls /
+> /joplin cat ada7a
+> what do my Joplin notes say about the Oi contract?
+```
 
-## Install
+## Highlights
+
+- **No overlapping runs.** A PID lock skips a run while the previous one is still going, and
+  detects locks left behind by a crash.
+- **Hung syncs are killed.** A sync that runs past the timeout (90 minutes by default) is stopped
+  and reported, so it cannot block the next runs.
+- **Notifications that respect your attention.** You are notified on the first failure, again
+  every hour while it keeps failing, once when it recovers, and when syncing stalls because
+  another `joplin` process holds the lock.
+- **Bounded logs.** It rotates its own logs and Joplin's `log.txt`, which the CLI only rotates in
+  interactive mode.
+- **E2EE aware.** Each sync is followed by `e2ee decrypt`, because the CLI exits before its
+  background decryption finishes.
+- **Survives Node upgrades.** The agent pins the Node binary by absolute path, so switching your
+  global version in mise, nvm or asdf does not break it.
+- **Agent-safe Joplin.** The plugin keeps Claude out of the TUI and the external editor, uses IDs
+  instead of ambiguous titles, searches through a read-only SQLite query, and asks before deleting
+  anything or making changes that affect every device.
+- **Nothing to install at runtime.** TypeScript runs on Node's built-in type stripping, with only
+  the standard library.
+
+## Quick start
+
+Requirements: macOS, Node.js 24+, and the Joplin terminal app installed for that Node version and
+already configured (`joplin sync` works when you run it by hand).
 
 ```bash
+npm install -g joplin   # if you don't have it yet; then configure sync and run `joplin sync` once
+
 git clone https://github.com/rafaelp/agentic-joplin.git
 cd agentic-joplin
-npm install            # dev dependencies only (TypeScript, @types/node)
-npm run sync           # one run in the foreground, to check that everything works
-npm run agent:install  # write ~/Library/LaunchAgents/agentic-joplin.plist and load it
+npm install             # dev dependencies only (TypeScript, @types/node)
+npm run sync            # one run in the foreground, to check that everything works
+npm run agent:install   # install and start the launchd agent
 ```
 
-The agent runs the Node binary that ran `agent:install`, by absolute path, and looks for `joplin`
-next to it. Switching your global Node version (mise, nvm, asdf…) therefore does not break it. If
-you remove that Node version, install Joplin on the new one and run `npm run agent:install` again.
+<details>
+<summary>Installing Joplin fails while building <code>sharp</code>, or npm skips install scripts</summary>
+
+If `sharp` tries to compile against a Homebrew `libvips` and fails, set
+`SHARP_IGNORE_GLOBAL_LIBVIPS=1`. If npm skips install scripts, allow the native modules:
+
+```bash
+SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install -g joplin --allow-scripts=keytar,sharp,sqlite3
+```
+
+</details>
+
+## Claude Code plugin
+
+This repository is also a Claude Code plugin marketplace. In Claude Code:
+
+```text
+/plugin marketplace add rafaelp/agentic-joplin
+/plugin install agentic-joplin@agentic-joplin
+```
+
+| Skill | Use | What it does |
+| --- | --- | --- |
+| `joplin-cli` | Loaded automatically when you ask about your Joplin notes | Reading, searching, creating, editing, organizing, syncing and exporting notes through the CLI, without its traps |
+| `joplin` | `/joplin [command] [args...]` | Runs a Joplin CLI command and asks for confirmation before destructive or account-wide ones |
+
+The plugin works without the sync agent, and on any OS where the Joplin CLI runs. See the
+[plugin README](plugins/agentic-joplin/README.md) for details.
 
 ## Usage
 
@@ -60,8 +125,6 @@ you remove that Node version, install Joplin on the new one and run `npm run age
 | `npm run agent:print` | Print the plist that `agent:install` would write |
 | `npm run agent:uninstall` | Unload the agent and delete its plist |
 
-Files:
-
 | Path | Content |
 | --- | --- |
 | `~/Library/LaunchAgents/agentic-joplin.plist` | The launchd agent |
@@ -72,7 +135,7 @@ Files:
 
 ## Configuration
 
-Settings are environment variables. Set them when running `npm run agent:install` and they are
+Settings are environment variables. Set them when you run `npm run agent:install` and they are
 written into the plist, so they also apply to scheduled runs:
 
 ```bash
@@ -101,6 +164,9 @@ To run a second agent for another Joplin profile, give it its own label:
 AJ_LABEL=agentic-joplin-work JOPLIN_PROFILE=~/.config/joplin-work npm run agent:install
 ```
 
+The agent runs the Node binary that ran `agent:install`, and looks for `joplin` next to it. If you
+remove that Node version, install Joplin on the new one and run `npm run agent:install` again.
+
 ## How a run works
 
 1. Take the lock. If another run holds it, log a skip and exit.
@@ -112,29 +178,49 @@ AJ_LABEL=agentic-joplin-work JOPLIN_PROFILE=~/.config/joplin-work npm run agent:
 5. Run `joplin e2ee decrypt` with its own timeout.
 6. Update `state.json`, notify if needed, and release the lock.
 
-launchd itself never starts a second copy of a job that is still running. The lock covers the other
-cases, such as `npm run sync` by hand while the agent runs.
-
-## Notifications
-
 Notifications go through `osascript`, so macOS shows them as coming from **Script Editor**. If none
-show up, enable Script Editor in System Settings → Notifications. To check that they work, run
-something that fails, without touching your real state, by pointing the label elsewhere:
+appear, enable Script Editor in System Settings → Notifications.
 
-```bash
-AJ_LABEL=agentic-joplin-test JOPLIN_BIN=/usr/bin/false npm run sync
-rm -rf ~/Library/Logs/agentic-joplin-test ~/Library/Application\ Support/agentic-joplin-test
+## Repository layout
+
+```text
+agentic-joplin/
+├── .claude-plugin/
+│   └── marketplace.json   # Claude Code marketplace manifest
+├── .github/               # CI, issue and pull request templates, logo
+├── plugins/
+│   └── agentic-joplin/    # Claude Code plugin
+│       ├── .claude-plugin/plugin.json
+│       └── skills/
+│           ├── joplin/        # /joplin [command]
+│           └── joplin-cli/    # How to use the Joplin CLI
+└── src/                   # The sync agent (TypeScript, no build step)
+    ├── agent.ts           # install, uninstall, status, print, run, logs
+    ├── sync.ts            # One sync run
+    ├── config.ts          # Settings and environment variables
+    ├── joplin.ts          # Runs joplin with a timeout and reads its result
+    ├── lock.ts            # PID lock
+    ├── log.ts             # Logging and rotation
+    ├── notify.ts          # macOS notifications
+    └── state.ts           # Failure and skip counters
 ```
 
-## Development
+## Contributing
 
-```bash
-npm run typecheck
-```
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull
+request. Everything in this project (code, documentation, comments and commit messages) is written
+in English.
 
-The code is erasable-syntax TypeScript (no enums, namespaces or parameter properties) so Node can
-run it without a build step. See [CONTRIBUTING.md](CONTRIBUTING.md).
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+Please do not report vulnerabilities in public issues. See [SECURITY.md](SECURITY.md) for how to
+report them privately.
 
 ## License
 
-[MIT](LICENSE)
+agentic-joplin is licensed under the [MIT License](LICENSE).
+
+agentic-joplin is an independent project. It is not affiliated with or endorsed by Joplin or its
+authors. "Joplin" is used only to describe what this project works with.

@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Claude Code plugin marketplace with the `agentic-joplin` plugin:
+  - `joplin-cli` skill, which teaches the Joplin terminal app: reading, read-only SQLite search,
+    writing with `set`, trash, sync and E2EE, import and export.
+  - `/joplin [command]` skill, which runs Joplin CLI commands and confirms destructive ones.
+- Logo, Code of Conduct, CI (typecheck, manifests, plist and a smoke test), issue and pull request
+  templates, and Dependabot.
+
 ## [0.1.0] - 2026-11-10
 
 ### Added

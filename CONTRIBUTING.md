@@ -6,6 +6,7 @@ Thanks for helping. Bug reports, fixes and small features are welcome.
 
 - For anything bigger than a bug fix, open an issue first so we can agree on the approach.
 - Security problems go through [SECURITY.md](SECURITY.md), not public issues.
+- This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Setup
 
@@ -27,6 +28,25 @@ files with their `.ts` extension.
   `src/config.ts` so `agent:install` copies them into the plist, and document them in the README.
 - **Joplin output is translated.** Do not detect states by matching English CLI messages alone.
   Prefer exit codes, file names or the untranslated `log.txt` entries, as `src/joplin.ts` does.
+
+## Claude Code plugin
+
+The plugin lives in `plugins/agentic-joplin/`, and the marketplace manifest in
+`.claude-plugin/marketplace.json`. When you change a skill:
+
+- Check every command it teaches against a throwaway profile, never your real notes:
+  `joplin --profile /tmp/joplin-test …`.
+- Keep the safety rules: never open the TUI or `edit`, use IDs for writes, open SQLite read-only,
+  confirm before destructive commands, and never put the master password on a command line.
+- Validate the manifests and try the plugin from disk:
+
+```bash
+claude plugin validate .
+claude plugin validate plugins/agentic-joplin
+claude --plugin-dir plugins/agentic-joplin -p "/joplin ls /"
+```
+
+- Bump `version` in both `plugin.json` and `marketplace.json` when you release a change.
 
 ## Testing a change
 
